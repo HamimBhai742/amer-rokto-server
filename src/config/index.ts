@@ -13,4 +13,7 @@ export default {
   jwt_access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN || "1d",
   jwt_reset_secret: process.env.JWT_RESET_SECRET || "fallback_reset_secret",
   jwt_reset_expires_in: process.env.JWT_RESET_EXPIRES_IN || "5m",
+  admin_email: process.env.ADMIN_EMAIL || "admin@amer-rokto.com",
+  admin_password: process.env.ADMIN_PASSWORD || "admin123456",
+  admin_name: process.env.ADMIN_NAME || "Super Admin",
 };
