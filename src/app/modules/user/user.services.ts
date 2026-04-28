@@ -1,15 +1,21 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { prisma } from "../../lib/prisma";
-import { Prisma } from "@prisma/client";
 import { emailSender } from "../../utils/emailSender";
 import { registerEmailTemplate } from "../../utils/emailTemplate/registerEmailTemplate";
 import jwt from "jsonwebtoken";
 import AppError from "../../utils/app.erro";
 import httpStatus from "http-status";
 import config from "../../../config";
+import {
+  IChangePasswordPayload,
+  IResendOtpPayload,
+  IUserRegisterPayload,
+  IUserUpdatePayload,
+  IVerifyOtpPayload,
+} from "../../types/global";
 
-const userRegister = async (payload: Prisma.UserCreateInput) => {
+const userRegister = async (payload: IUserRegisterPayload) => {
   // 1. Check if user already exists
   const isUserExist = await prisma.user.findUnique({
     where: {
@@ -83,7 +89,7 @@ const userRegister = async (payload: Prisma.UserCreateInput) => {
   return userWithoutSensitiveInfo;
 };
 
-const verifyOtp = async (payload: { email: string; otp: string }) => {
+const verifyOtp = async (payload: IVerifyOtpPayload) => {
   // 1. Find user by email
   const user = await prisma.user.findUnique({
     where: { email: payload.email },
@@ -143,7 +149,7 @@ const verifyOtp = async (payload: { email: string; otp: string }) => {
   };
 };
 
-const resendOtp = async (payload: { email: string }) => {
+const resendOtp = async (payload: IResendOtpPayload) => {
   // 1. Find the user
   const user = await prisma.user.findUnique({
     where: { email: payload.email },
@@ -185,10 +191,72 @@ const resendOtp = async (payload: { email: string }) => {
   const { password, otp: _, ...userWithoutSensitiveInfo } = updatedUser;
 
   return userWithoutSensitiveInfo;
+};  
+
+const changePassword = async (payload: IChangePasswordPayload) => {
+  // 1. Find the user
+  const user = await prisma.user.findUnique({
+    where: { email: payload.email },
+  });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found with this email.");
+  }
+
+  // 2. Check if old password matches
+  const isPasswordMatched = await bcrypt.compare(
+    payload.oldPassword,
+    user.password
+  );
+
+  if (!isPasswordMatched) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Old password does not match.");
+  }
+
+  // 3. Hash new password
+  const saltRounds = 12;
+  const hashedPassword = await bcrypt.hash(payload.newPassword, saltRounds);
+
+  // 4. Update the user
+  const updatedUser = await prisma.user.update({
+    where: { email: payload.email },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, otp: _, ...userWithoutSensitiveInfo } = updatedUser;
+  return userWithoutSensitiveInfo;
+};
+
+const updateProfile = async (payload: IUserUpdatePayload) => {
+  // 1. Find the user
+  const user = await prisma.user.findUnique({
+    where: { email: payload?.email },
+  });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found with this email.");
+  }
+
+  // 2. Update the user
+  const updatedUser = await prisma.user.update({
+    where: { email: payload.email },
+    data: payload,
+  });
+
+  // 3. Return response sans sensitive data
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, otp: _, ...userWithoutSensitiveInfo } = updatedUser;
+
+  return userWithoutSensitiveInfo;
 };
 
 export const UserServices = {
   userRegister,
   verifyOtp,
   resendOtp,
+  updateProfile,
+  changePassword,
 };

@@ -36,8 +36,21 @@ const resendOtp = catchAsync(async(req: Request, res:Response)=>{
     })
 })
 
+const changePassword = catchAsync(async(req: Request, res:Response)=>{
+    const { oldPassword, newPassword } = req.body;
+    const email = req.user.email;
+    const result = await UserServices.changePassword({ email, oldPassword, newPassword });
+    sendResponse(res,{
+        statusCode:httpStatus.OK,
+        success:true,
+        message:"Password changed successfully",
+        data:result
+    })
+})
+
 export const userController = {
     userRegister,
     verifyOtp,
-    resendOtp
+    resendOtp,
+    changePassword
 }

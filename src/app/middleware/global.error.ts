@@ -2,6 +2,7 @@ import { ErrorRequestHandler } from "express";
 import httpStatus from "http-status";
 import AppError from "../utils/app.erro";
 import { Prisma } from "@prisma/client";
+import { ZodError } from "zod";
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   // Default Error Configuration
@@ -59,7 +60,18 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
       ];
     }
   }
-  // 4. Handling Generic Built-in Error
+  // 4. Handling Zod Validation Error
+  else if (err instanceof ZodError) {
+    statusCode = httpStatus.BAD_REQUEST;
+    // Map all Zod issue messages into a beautifully readable single sentence string
+    message = err.issues.map((issue) => issue.message).join(". ");
+    
+    errorSources = err.issues.map((issue) => ({
+      path: String(issue.path[issue.path.length - 1]),
+      message: issue.message,
+    }));
+  }
+  // 5. Handling Generic Built-in Error
   else if (err instanceof Error) {
     message = err.message;
     errorSources = [

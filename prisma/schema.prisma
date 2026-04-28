@@ -8,16 +8,48 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
   name       String
-  email      String    @unique
+  email      String  @unique
   password   String
-  role       Role      @default(USER)
-  isVerified Boolean   @default(false)
+  role       Role    @default(USER)
+  isVerified Boolean @default(false)
+
+  bloodGroup String?
+  location   String?
+  district   String?
+  upazila    String?
+
+  contact          String?
+  emergencyContact String?
+
+  gender      String?
+  age         Int?
+  dateOfBirth DateTime?
+
+  lastDonation  DateTime?
+  donationCount Int       @default(0)
+  isAvailable   Boolean   @default(true)
+
+  weight         Float?
+  hasDisease     Boolean @default(false)
+  diseaseDetails String?
+
+  profileImage String?
+  rating       Float   @default(0)
+
+  isNotified Boolean   @default(true)
+  lastActive DateTime?
+
   otp        String?
   otpExpires DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+
+  // add these
+  requestedBloodRequests BloodRequest[] @relation("BloodRequester")
+  donatedBloodRequests   BloodRequest[] @relation("BloodDonor")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("users")
 }
@@ -25,4 +57,38 @@ model User {
 enum Role {
   USER
   ADMIN
+}
+
+// Represents a request for blood
+model BloodRequest {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  requesterId String @db.ObjectId
+  requester   User   @relation("BloodRequester", fields: [requesterId], references: [id])
+
+  donorId String? @db.ObjectId
+  donor   User?   @relation("BloodDonor", fields: [donorId], references: [id])
+
+  bloodGroup   String
+  phoneNumber  String
+  hospitalName String
+  location     String
+  district     String?
+  upazila      String?
+  needDate     DateTime
+  urgency      String   @default("Normal")
+
+  status RequestStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("blood_requests")
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+  CANCELLED
 }

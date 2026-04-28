@@ -5,6 +5,7 @@ import { catchAsync } from "../../utils/catch.async";
 import { sendResponse } from "../../utils/sendResponse";
 
 const loginUser = catchAsync(async(req:Request,res:Response)=>{
+    console.log(req.body)
     const result = await authServices.loginUser(req.body);
     sendResponse(res,{
         statusCode:httpStatus.OK,

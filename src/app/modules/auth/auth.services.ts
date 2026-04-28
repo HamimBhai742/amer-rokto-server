@@ -8,8 +8,14 @@ import crypto from "crypto";
 import { emailSender } from "../../utils/emailSender";
 import { forgotPasswordTemplate } from "../../utils/emailTemplate/forgotPasswordTemplate";
 import { resetSuccessTemplate } from "../../utils/emailTemplate/resetSuccessTemplate";
+import {
+  IForgotPasswordPayload,
+  ILoginUserPayload,
+  IResetPasswordPayload,
+  IVerifyOtpPayload,
+} from "../../types/global";
 
-const loginUser = async (payload: { email: string; password: string }) => {
+const loginUser = async (payload: ILoginUserPayload) => {
   // 1. Find user by email
   const user = await prisma.user.findUnique({
     where: { email: payload.email },
@@ -34,6 +40,13 @@ const loginUser = async (payload: { email: string; password: string }) => {
   if (!isPasswordMatched) {
     throw new AppError(httpStatus.UNAUTHORIZED, "Incorrect password.");
   }
+
+  await prisma.user.update({
+    where: { email: payload.email },
+    data: {
+      lastActive: new Date(),
+    },
+  }); 
 
   // 4. Generate JWT Token
   const jwtPayload = {
@@ -60,7 +73,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
   };
 };
 
-const forgotPassword = async (payload: { email: string }) => {
+const forgotPassword = async (payload: IForgotPasswordPayload) => {
   // 1. Check user exists
   const user = await prisma.user.findUnique({
     where: { email: payload.email },
@@ -95,7 +108,7 @@ const forgotPassword = async (payload: { email: string }) => {
   return null;
 };
 
-const resetPassword = async (payload: { resetToken: string; newPassword: string }) => {
+const resetPassword = async (payload: IResetPasswordPayload) => {
   // 1. Verify JWT Reset Token
   let decodedData;
   try {
@@ -144,7 +157,7 @@ const resetPassword = async (payload: { resetToken: string; newPassword: string 
   return null;
 };
 
-const verifyOtp = async (payload: { email: string; otp: string }) => {
+const verifyOtp = async (payload: IVerifyOtpPayload) => {
   const user = await prisma.user.findUnique({
     where: { email: payload.email },
   });
