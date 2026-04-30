@@ -229,7 +229,7 @@ const updateBloodRequestStatus = async (id: string, donorId: string, payload: { 
   return result;
 };
 
-export const BloodServices = {
+export const bloodServices = {
   getBloodDonors,
   getBloodDonorDetails,
   createBloodRequest,

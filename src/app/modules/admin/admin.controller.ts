@@ -2,10 +2,10 @@ import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catch.async";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
-import { AdminServices } from "./admin.services";
+import { adminServices } from "./admin.services";
 
 const getSystemStats = catchAsync(async (req: Request, res: Response) => {
-  const result = await AdminServices.getSystemStats();
+  const result = await adminServices.getSystemStats();
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -16,7 +16,7 @@ const getSystemStats = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const result = await AdminServices.getAllUsers(req.query);
+  const result = await adminServices.getAllUsers(req.query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -27,7 +27,7 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
 });
 
 const changeUserRole = catchAsync(async (req: Request, res: Response) => {
-  const result = await AdminServices.changeUserRole(req.params.id as string, req.body);
+  const result = await adminServices.changeUserRole(req.params.id as string, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -37,7 +37,7 @@ const changeUserRole = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const AdminController = {
+export const adminController = {
   getSystemStats,
   getAllUsers,
   changeUserRole,

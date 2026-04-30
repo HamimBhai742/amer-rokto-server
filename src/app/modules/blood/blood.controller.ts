@@ -2,10 +2,10 @@ import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catch.async";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
-import { BloodServices } from "./blood.services";
+import { bloodServices } from "./blood.services";
 
 const getBloodDonors = catchAsync(async (req: Request, res: Response) => {
-  const result = await BloodServices.getBloodDonors(req.query);
+  const result = await bloodServices.getBloodDonors(req.query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -16,7 +16,7 @@ const getBloodDonors = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getBloodDonorDetails = catchAsync(async (req: Request, res: Response) => {
-  const result = await BloodServices.getBloodDonorDetails(req.params.id as string);
+  const result = await bloodServices.getBloodDonorDetails(req.params.id as string);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -28,7 +28,7 @@ const getBloodDonorDetails = catchAsync(async (req: Request, res: Response) => {
 
 const createBloodRequest = catchAsync(async (req: Request, res: Response) => {
   const requesterId = req.user.userId;
-  const result = await BloodServices.createBloodRequest(requesterId, req.body);
+  const result = await bloodServices.createBloodRequest(requesterId, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -39,7 +39,7 @@ const createBloodRequest = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllBloodRequests = catchAsync(async (req: Request, res: Response) => {
-  const result = await BloodServices.getAllBloodRequests(req.query);
+  const result = await bloodServices.getAllBloodRequests(req.query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -50,7 +50,7 @@ const getAllBloodRequests = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getBloodRequestById = catchAsync(async (req: Request, res: Response) => {
-  const result = await BloodServices.getBloodRequestById(req.params.id as string);
+  const result = await bloodServices.getBloodRequestById(req.params.id as string);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -62,7 +62,7 @@ const getBloodRequestById = catchAsync(async (req: Request, res: Response) => {
 
 const updateBloodRequest = catchAsync(async (req: Request, res: Response) => {
   const requesterId = req.user.userId;
-  const result = await BloodServices.updateBloodRequest(req.params.id as string, requesterId, req.body);
+  const result = await bloodServices.updateBloodRequest(req.params.id as string, requesterId, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -74,7 +74,7 @@ const updateBloodRequest = catchAsync(async (req: Request, res: Response) => {
 
 const updateBloodRequestStatus = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.userId;
-  const result = await BloodServices.updateBloodRequestStatus(req.params.id as string, userId, req.body);
+  const result = await bloodServices.updateBloodRequestStatus(req.params.id as string, userId, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -84,7 +84,7 @@ const updateBloodRequestStatus = catchAsync(async (req: Request, res: Response) 
   });
 });
 
-export const BloodController = {
+export const bloodController = {
   getBloodDonors,
   getBloodDonorDetails,
   createBloodRequest,

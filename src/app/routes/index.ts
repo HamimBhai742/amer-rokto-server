@@ -2,8 +2,8 @@ import { Router } from "express";
 import { userRoutes } from "../modules/user/user.route";
 import { authRoutes } from "../modules/auth/auth.routes";
 
-import { BloodRoutes } from "../modules/blood/blood.routes";
-import { AdminRoutes } from "../modules/admin/admin.routes";
+import { bloodRoutes } from "../modules/blood/blood.routes";
+import { adminRoutes } from "../modules/admin/admin.routes";
 
 export const router=Router()
 
@@ -19,11 +19,11 @@ const routes=[
     },
     {
         path:"/blood",
-        route:BloodRoutes
+        route:bloodRoutes
     },
     {
         path:"/admin",
-        route:AdminRoutes
+        route:adminRoutes
     }
 ]
 

@@ -78,7 +78,7 @@ const changeUserRole = async (userId: string, payload: { role: "USER" | "ADMIN" 
   return updatedUser;
 };
 
-export const AdminServices = {
+export const adminServices = {
   getSystemStats,
   getAllUsers,
   changeUserRole,

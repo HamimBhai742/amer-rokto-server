@@ -24,7 +24,6 @@ export const checkAuth = (...requiredRoles: string[]) => {
     }
 
     const token = authHeader.split(" ")[1];
-
     // 2. Validate token
     let decoded: JwtPayload;
     try {
