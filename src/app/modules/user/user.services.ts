@@ -11,9 +11,45 @@ import {
   IChangePasswordPayload,
   IResendOtpPayload,
   IUserRegisterPayload,
-  IUserUpdatePayload,
+  IUserProfileUpdatePayload,
   IVerifyOtpPayload,
 } from "../../types/global";
+import { Prisma } from "@prisma/client";
+
+const parseProfileDate = (value: Date | string) => {
+  if (value instanceof Date) {
+    return value;
+  }
+
+  const isoDateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const slashDateMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch.map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+  }
+
+  if (slashDateMatch) {
+    const [, month, day, year] = slashDateMatch.map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+  }
+
+  return new Date(value);
+};
+
+const normalizeUserDates = <T extends { dateOfBirth?: Date | string; lastDonation?: Date | string }>(
+  payload: T
+) => {
+  return {
+    ...payload,
+    ...(payload.dateOfBirth !== undefined && {
+      dateOfBirth: parseProfileDate(payload.dateOfBirth),
+    }),
+    ...(payload.lastDonation !== undefined && {
+      lastDonation: parseProfileDate(payload.lastDonation),
+    }),
+  };
+};
 
 const userRegister = async (payload: IUserRegisterPayload) => {
   // 1. Check if user already exists
@@ -65,7 +101,7 @@ const userRegister = async (payload: IUserRegisterPayload) => {
   // 5. Save the user to the database
   const createdUser = await prisma.user.create({
     data: {
-      ...payload,
+      ...normalizeUserDates(payload),
       password: hashedPassword,
       otp,
       otpExpires,
@@ -230,20 +266,55 @@ const changePassword = async (payload: IChangePasswordPayload) => {
   return userWithoutSensitiveInfo;
 };
 
-const updateProfile = async (payload: IUserUpdatePayload) => {
+const updateProfile = async (email: string, payload: IUserProfileUpdatePayload) => {
   // 1. Find the user
   const user = await prisma.user.findUnique({
-    where: { email: payload?.email },
+    where: { email },
   });
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User not found with this email.");
   }
 
+  const allowedFields: (keyof IUserProfileUpdatePayload)[] = [
+    "name",
+    "bloodGroup",
+    "location",
+    "district",
+    "upazila",
+    "contact",
+    "emergencyContact",
+    "gender",
+    "age",
+    "dateOfBirth",
+    "lastDonation",
+    "weight",
+    "hasDisease",
+    "diseaseDetails",
+    "profileImage",
+    "isAvailable",
+    "isNotified",
+  ];
+
+  const updateData: Prisma.UserUpdateInput = {};
+
+  allowedFields.forEach((field) => {
+    const value = payload[field];
+
+    if (value !== undefined) {
+      if (field === "dateOfBirth" || field === "lastDonation") {
+        (updateData as Record<string, unknown>)[field] = parseProfileDate(value as Date | string);
+        return;
+      }
+
+      (updateData as Record<string, unknown>)[field] = value;
+    }
+  });
+
   // 2. Update the user
   const updatedUser = await prisma.user.update({
-    where: { email: payload.email },
-    data: payload,
+    where: { email },
+    data: updateData,
   });
 
   // 3. Return response sans sensitive data

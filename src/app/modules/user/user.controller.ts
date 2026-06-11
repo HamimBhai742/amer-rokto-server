@@ -48,9 +48,21 @@ const changePassword = catchAsync(async(req: Request, res:Response)=>{
     })
 })
 
+const updateProfile = catchAsync(async(req: Request, res:Response)=>{
+    const email = req.user.email;
+    const result = await UserServices.updateProfile(email, req.body);
+    sendResponse(res,{
+        statusCode:httpStatus.OK,
+        success:true,
+        message:"Profile updated successfully",
+        data:result
+    })
+})
+
 export const userController = {
     userRegister,
     verifyOtp,
     resendOtp,
-    changePassword
+    changePassword,
+    updateProfile
 }

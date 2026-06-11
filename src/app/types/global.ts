@@ -47,6 +47,22 @@ export interface IChangePasswordPayload {
   newPassword: string;
 }
 
-export interface IUserUpdatePayload extends Partial<IUserRegisterPayload> {
-  email: string;
+export interface IUserProfileUpdatePayload {
+  name?: string;
+  bloodGroup?: string;
+  location?: string;
+  district?: string;
+  upazila?: string;
+  contact?: string;
+  emergencyContact?: string;
+  gender?: string;
+  age?: number;
+  dateOfBirth?: Date | string;
+  lastDonation?: Date | string;
+  weight?: number;
+  hasDisease?: boolean;
+  diseaseDetails?: string;
+  profileImage?: string;
+  isAvailable?: boolean;
+  isNotified?: boolean;
 }

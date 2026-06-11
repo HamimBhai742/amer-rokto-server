@@ -10,5 +10,7 @@ router.post("/register", validateRequest(UserValidation.userRegisterValidationSc
 router.post("/verify-otp", validateRequest(UserValidation.verifyOtpValidationSchema), userController.verifyOtp)
 router.post("/resend-otp", validateRequest(UserValidation.resendOtpValidationSchema), userController.resendOtp)
 router.post("/change-password", checkAuth("USER", "ADMIN"), validateRequest(UserValidation.changePasswordValidationSchema), userController.changePassword)
+router.patch("/profile", checkAuth("USER", "ADMIN"), validateRequest(UserValidation.updateProfileValidationSchema), userController.updateProfile)
+router.put("/profile", checkAuth("USER", "ADMIN"), validateRequest(UserValidation.updateProfileValidationSchema), userController.updateProfile)
 
 export const userRoutes=router

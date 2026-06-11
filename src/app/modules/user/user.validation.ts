@@ -1,5 +1,39 @@
 import { z } from "zod";
 
+const isValidDateInput = (value: string) => {
+  const isoDateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const slashDateMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch.map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    return (
+      date.getUTCFullYear() === year &&
+      date.getUTCMonth() === month - 1 &&
+      date.getUTCDate() === day
+    );
+  }
+
+  if (slashDateMatch) {
+    const [, month, day, year] = slashDateMatch.map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    return (
+      date.getUTCFullYear() === year &&
+      date.getUTCMonth() === month - 1 &&
+      date.getUTCDate() === day
+    );
+  }
+
+  return !Number.isNaN(Date.parse(value));
+};
+
+const dateInputSchema = z.union([
+  z.date(),
+  z.string().refine(isValidDateInput, "Invalid date"),
+]);
+
 const userRegisterValidationSchema = z.object({
   body: z.object({
     name: z.string().min(1, "Name is required"),
@@ -16,8 +50,8 @@ const userRegisterValidationSchema = z.object({
     emergencyContact: z.string().optional(),
     gender: z.string().optional(),
     age: z.number().int().optional(),
-    dateOfBirth: z.string().datetime().or(z.date()).optional(),
-    lastDonation: z.string().datetime().or(z.date()).optional(),
+    dateOfBirth: dateInputSchema.optional(),
+    lastDonation: dateInputSchema.optional(),
     weight: z.number().optional(),
     hasDisease: z.boolean().optional(),
     diseaseDetails: z.string().optional(),
@@ -56,15 +90,15 @@ const updateProfileValidationSchema = z.object({
     emergencyContact: z.string().optional(),
     gender: z.string().optional(),
     age: z.number().int().optional(),
-    dateOfBirth: z.string().datetime().or(z.date()).optional(),
-    lastDonation: z.string().datetime().or(z.date()).optional(),
+    dateOfBirth: dateInputSchema.optional(),
+    lastDonation: dateInputSchema.optional(),
     weight: z.number().optional(),
     hasDisease: z.boolean().optional(),
     diseaseDetails: z.string().optional(),
     profileImage: z.string().optional(),
     isAvailable: z.boolean().optional(),
     isNotified: z.boolean().optional()
-  }),
+  }).strict(),
 });
 
 export const UserValidation = {
