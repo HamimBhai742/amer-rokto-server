@@ -12,6 +12,7 @@ const isValidDateInput = (value: string) => {
       date.getUTCFullYear() === year &&
       date.getUTCMonth() === month - 1 &&
       date.getUTCDate() === day
+      
     );
   }
 
